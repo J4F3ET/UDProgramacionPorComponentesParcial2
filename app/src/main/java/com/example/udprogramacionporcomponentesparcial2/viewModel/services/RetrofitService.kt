@@ -1,26 +1,34 @@
 package com.example.udprogramacionporcomponentesparcial2.viewModel.services
 
-import com.example.udprogramacionporcomponentesparcial2.model.ApiService
+import android.util.Log
 import com.example.udprogramacionporcomponentesparcial2.model.Fruit
-import com.example.udprogramacionporcomponentesparcial2.model.Nutritions
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import retrofit2.converter.moshi.MoshiConverterFactory
-import retrofit2.Retrofit
+import com.example.udprogramacionporcomponentesparcial2.model.IRepository
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
-
-
-
-class RetrofitService():ApiService  {
-    val moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
-    val retrofit = Retrofit.Builder()
-        .baseUrl("https://www.fruityvice.com/api/fruit/all/")
-        .addConverterFactory(MoshiConverterFactory.create(moshi))
+@OptIn(DelicateCoroutinesApi::class)
+class RetrofitService {
+    private val retrofit: Retrofit = Retrofit.Builder()
+        .baseUrl("https://www.fruityvice.com/api/")
+        .addConverterFactory(GsonConverterFactory.create())
         .build()
-
-    val apiService = retrofit.create(ApiService::class.java)
-
-    override suspend fun getFruits(): List<Fruit> {
-        return apiService.getFruits()
+    private val apiService: IRepository = retrofit.create(IRepository::class.java)
+    lateinit var fruits:List<Fruit>
+    init {
+        GlobalScope.launch(Dispatchers.IO){
+            fruits = fetchFruits()
+        }
+    }
+    private suspend fun fetchFruits(): List<Fruit> {
+        return try {
+            apiService.getFruits()
+        } catch (e: Exception) {
+            Log.e("Error fetching fruits:", "${e.message}")
+            emptyList()
+        }
     }
 }

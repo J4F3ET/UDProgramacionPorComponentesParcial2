@@ -11,6 +11,6 @@ fun AppNavigation(){
     val navController = rememberNavController()
     NavHost(navController = navController,startDestination = AppScreens.Index.router){
         composable(route = AppScreens.Index.router){ Index(navController)}
-        composable(route = AppScreens.FruitDetailScreen.router){FruitDetailScreen(navController,null)}
+        composable(route = AppScreens.FruitDetailScreen.router){FruitDetailScreen(navController)}
     }
 }
